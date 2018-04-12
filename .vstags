@@ -1,0 +1,36 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Add_Physical_Property	TMBPred.pm	804;"	s
+Configuration	Configuration.pm	3;"	p
+Convert_Bind	TMBPred.pm	680;"	s
+Create_TestData	TMBPred.pm	867;"	s
+Freecontact_Parser	TMBPred.pm	466;"	s
+Get_Res_Di_Mi_Hash	TMBPred.pm	361;"	s
+Get_Seg_Start_End	TMBPred.pm	324;"	s
+Lips_Score_Calc	TMBPred.pm	608;"	s
+MergeFile	TMBPred.pm	726;"	s
+Oa3m_Parser	TMBPred.pm	66;"	s
+Pssm_Entropy_Calculate	TMBPred.pm	86;"	s
+Read_Fasta	TMBPred.pm	199;"	s
+Relative_Position_Calc	TMBPred.pm	553;"	s
+Remove_Uncomplete_Lines	TMBPred.pm	935;"	s
+Run_Freecontact	TMBPred.pm	178;"	s
+Run_Hhblits	TMBPred.pm	43;"	s
+Run_Phobius	TMBPred.pm	230;"	s
+Run_Test	TMBPred.pm	981;"	s
+Segment_Parser	TMBPred.pm	254;"	s
+TMBPred	TMBPred.pm	3;"	p
+printLongN1	Scripts/phobius.pl	179;"	s
+printPosterior	Scripts/phobius.pl	272;"	s
+printShortN1	Scripts/phobius.pl	236;"	s
+print_entry	Scripts/phobius.pl	50;"	s
+print_output	Scripts/lips.pl	27;"	s
+read_entry	Scripts/phobius.pl	88;"	s
+read_predict	Scripts/phobius.pl	153;"	s
+residuename123	Scripts/lips.pl	303;"	s
+residuename321	Scripts/lips.pl	256;"	s
+tempname	Scripts/phobius.pl	36;"	s

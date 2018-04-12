@@ -1,0 +1,86 @@
+--------------------------------------------------------------------------------
+TMBPred - a tool for predicting interacting residues of alpha-helix transmembrane proteins. 
+
+Version 1.0 (2th Mar 2017)
+--------------------------------------------------------------------------------
+
+TMBPred is a Perl pipeline to predict the interface residues of alpha-helix transmembrane 
+proteins  according to their distinctive evolutionary, co-evolutionary, relative 
+position, physical property features, using machine learning methods. It can classify 
+interact and non-interact reisidues not only in transmembrane region, but also for residues in cytoplasmic
+and extracellular regions. 
+The TMBPred current version 1.0 used only the integrated classifier. For the future updated version, three single
+classifiers specially for three segment residues prediction will be developed. 
+
+
+System Requirements:
+Linux, UNIX, Cluser(to run programs such as Hhblits and freecontact requires a lot of memory, it is recommended to
+run these jobs on a cluster rather than on local station, especially if you have a bunch of proteins need to be 
+run simultaneously).
+
+Software and Database Prerequests:
+1 Perl
+
+2 R
+The following R packages need to be isntalled for Random Forest classifier:
+library(pROC)
+library(randomForest)
+library(ROCR)
+library(verification)
+
+3 Hhblits -- The HH-suite is an open-source software package for sensitive protein 
+sequence searching based on the pairwise alignment of hidden Markov models (HMMs).
+you can download and install through the following link:
+https://github.com/soedinglab/hh-suite
+
+4 Hhblits database -- where Hhblits will search and get homology for query sequce
+you can download the uniprot nonredundant database through:
+http://wwwuser.gwdg.de/%7Ecompbiol/data/hhsuite/databases/hhsuite_dbs/uniprot20_2015_06.tgz
+
+5 Polyphobius -- prediction of transmembrane topology and signal peptides from the 
+amino acid sequence of a protein.
+Here you can get polyphobius:
+http://phobius.sbc.su.se/data.html
+already in TMBPred1.0/Scripts/phobius.pl
+
+6 freecontact -- a protein residue contact predictor optimized for speed.
+Instructions on how to download and install Freecontact through:
+https://rostlab.org/owiki/index.php/FreeContact
+
+7 LIPS -- a convenient method for prediction of helix-lipid interfaces of TM helices from sequence information alone.
+you can download the LIPS.pl file through here:
+http://gila.bioe.uic.edu/lab/lips/
+already in TMBPred1.0/Scripts/lips.pl
+
+After the above software were downloaded and installed correcly, then you have to compile the software paths through 
+Configuration.pm, please do as the following steps:
+1. Uncompress TMBpred1.0.tar.gz in your preferred destination directory
+2. Change directory to TMBpred1.0/
+3. Change Configuration.pm manually for the path of software and datasets  
+4. Do the prediction by simply run "perl TMBPredTest.pl -i inputfile.fasta -c classifer.rf -o PredictOutput.txt" on the command line
+
+
+Example(in the TMBPred1.0 directory): 
+perl TMBPredTest.pl -i /home/students/zeng/TMBPred1.0/TestData/inputfile.fasta -c /home/students/zeng/TMBPred1.0/RandomForest/AllFit.rf -o /home/students/zeng/TMBPred1.0/OutPut/PredictOutput.txt
+
+Compulsory flags:
+   -i '/some/file' : use a user specified fast file path as the query transmembrane
+                     protein sequence.
+Optional flags:
+  -c '/some/classifier file' : uses a user specified path to the classifier.
+                               without the flag the default is the TMBPred1.0/RandomForest/AllFit.rf.
+  -o '/some/file' : writes the output to a user provided output file.
+                    Without the flag the output will be given to TMBPred1.0/OutPut/PredictOutput.txt \n"            
+  -h : this help;
+ 
+The output prediction file contains three columns : the residue names, the residue number in the 
+sequence, and the prediction score, the higher the score is, the more reliable the residue is an 
+interact residue.
+
+
+HOW TO CITE
+Please cite the article  "Bo Zeng, Peter Hönigschmid, Dmitrij Frishman1*: 
+Alpha-helical membrane protein interface residues prediction using a sequence-based random forest approach
+
+Contact:
+Bo Zeng (zengbo11@gmail.com)
