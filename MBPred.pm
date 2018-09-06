@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package TMBPred;
+package MBPred;
 require Exporter;
 use warnings;
 
@@ -35,7 +35,7 @@ our @EXPORT    = qw / Run_Hhblits
 #-------------------------------------------------------------------------------
 # Purpose   : run Hhblits to extract homologous from uniprot database
 # Usage     : Run_Hhblits($Fastaf,$Oa3mf) 
-# Arguments : the input fasta file and output a3m file 
+# Arguments : the input fasta file and output oa3m file
 # Returns   : the subroutine returns nothing but the homologous file will be saved
 # Globals   : none
 #******************
@@ -47,18 +47,25 @@ sub Run_Hhblits
 	my %set=%$set;
 	my $fasta_file = $set{"fastaf"};
 	my $output_oa3m_file=$set{"base_dir"}. "/TestData/". $set{"protein"}. ".out.oa3m";
+	if($set{"cluster_name"} ne ""){
+	print "\n ... using server cluster ". $set{"cluster_name"}. " to run hhblits ... \n";
 	system("qsub -b y -q $set{\"cluster_name\"} -N \"HhblitsJob\" $set{\"hhblits\"} -i $fasta_file  -oa3m $output_oa3m_file -d $set{\"hhblits_database\"} -Z 999999999	 -B 999999999 -maxfilt 999999999 -id 99 -diff inf");
-	print STDERR " hhblits done ... ";
+	}
+	else
+	{
+	    print "\n ... run hhblits at local computer... \n";
+	    system("$set{\"hhblits\"} -i $fasta_file  -oa3m $output_oa3m_file -d $set{\"hhblits_database\"}");
+	}
 }
 
 
 #-------------------------------------------------------------------------------
-# Purpose   : parse hhblits output a3m file, the output multiple sequense
+# Purpose   : parse hhblits output oa3m file, the output multiple sequense
 #			  alignments will have no lower-case character and no gaps in 
 #             the query sequence.  
 # Usage     : Oa3m_Parser($Oa3mf,$A3mf)
 #             sequences don't contain '>'
-# Arguments : hhblits output a3m file, and the parsed MSAs output filename
+# Arguments : hhblits output oa3m file, and the parsed MSAs a3m output filename
 # Returns   : nothing
 # Globals   : none
 #******************
@@ -182,8 +189,16 @@ sub Run_Freecontact
 	my %set=%$set;
 	my $a3m_file=$set{"base_dir"}. "/TestData/". $set{"protein"}. ".a3m";
 	my $freecontact_file=$set{"base_dir"}. "/TestData/". $set{"protein"}. ".freecontact";
-	system("qsub -b y -q $set{\"cluster_name\"} -o $freecontact_file -N \"FreecontactJob\" $set{\"freecontact\"} -f $a3m_file");
-	print STDERR "  .... freecontact done ... ";
+	if($set{"cluster_name"} ne "")
+	{
+        print "\n ... using server cluster ". $set{"cluster_name"}. " to run freecontact ... \n";
+        system("qsub -b y -q $set{\"cluster_name\"} -o $freecontact_file -N \"FreecontactJob\" $set{\"freecontact\"} -f $a3m_file");
+	}
+	else
+	{
+	    print "\n ... run freecontact at local computer... \n";
+	    system("$set{\"freecontact\"} -f $a3m_file > $freecontact_file");
+	}
 }
 
 
@@ -229,13 +244,13 @@ sub Read_Fasta
 
 sub Run_Phobius
 {
-	print STDERR " .... start to run phobus prediction ... ";
+	print STDERR "\n .... start to run phobus prediction ... \n";
 	my $set=$_[0];
 	my %set=%$set;
-	my $fasta_file=$set{"fastaf"};
+	my $fasta_file=Read_Fasta($set{"fastaf"});
 	my $seg_file=$set{"base_dir"}. "/TestData/". $set{"protein"}. ".seg";
-	system("perl $set{\"Polyphobius\"} $fasta_file >$seg_file");
-	print STDERR " ...phobius finished running ... ";
+	system("perl $set{\"phobius\"} $fasta_file >$seg_file");
+	print STDERR "\n ...phobius finished running ... \n";
 }
 
 
@@ -253,64 +268,85 @@ sub Run_Phobius
 
 sub Segment_Parser
 {
-	print STDERR "  .... start to parse segments .... ";
+print STDERR "  .... start to parse segments .... \n";
 	my $set=$_[0];
 	my %set=%$set;
 	my $protein=$set{"protein"};
 	my $fastaseq=Read_Fasta($set{"fastaf"});
-	my $i=1;
-	my $j=1;
-	my $k=1;
-	###in the segment file, 6,5,4 represents number of columns
-    	my %seg = (
-        "6"  => "out",
-        "5" => "in",
-        "4"  => "mem",
-    	);
-	 my %seg_num = (
-        "6"  => 1,
-        "5" => 1,
-        "4"  => 1,
-    	);
 	my $seg_file=$set{"base_dir"}. "/TestData/". $set{"protein"}. ".seg";
-	open FILE,"$seg_file" or die $!;
+	my $i=0;
+	my $j=0;
+	my $k=0;
+    open FILE,"$seg_file" or die $!;
 	while(<FILE>)
 	{
 		chomp;
-		if($_=~/TRANSMEM|CYTOPLASMIC|NON/)
-		{
-			my @array=split(" ",$_);
-			my $ColNum=@array;
-			while( my( $key, $value ) = each %seg )
-			{
-				if($key eq $ColNum)
-				{
-					my $segbeg=$array[2];
-					my $segend=$array[3];
-					my $seg_output_file=$set{"base_dir"}. "/TestData/". $protein. ".". $seg{$key}. $seg_num{$key};
-					open SegOut, ">$seg_output_file" or die $!;
-					for(my $Seg=$segbeg;$Seg<=$segend;$Seg++)
-					{
-						my $char=substr($fastaseq,$Seg-1,1);
-						print SegOut "$Seg\t$char\t$seg{$key}\n";
-					}
-					close(SegOut);
-					$seg_num{$key}=$seg_num{$key}+1;
-				}
-			}
-		}
+		my @array=split(" ",$_);
+        my $seg;
+        my $seg_output_file;
+        my $segbeg;
+        my $segend;
+        if($_=~/NON/)
+        {
+            $seg = "out";
+            $i = $i +1;
+            $seg_output_file=$set{"base_dir"}. "/TestData/".  $protein. ".". $seg. $i;
+            $segbeg=$array[2];
+            $segend=$array[3];
+            open SegOut, ">$seg_output_file" or die $!;
+            for(my $Seg=$segbeg;$Seg<=$segend;$Seg++)
+            {
+                my $char=substr($fastaseq,$Seg-1,1);
+                print SegOut "$Seg\t$char\t$seg\n";
+            }
+            close(SegOut);
+        }
+        if($_=~/TRANSMEM/)
+        {
+            $seg = "mem";
+            $j = $j +1;
+            $seg_output_file=$set{"base_dir"}. "/TestData/".  $protein. ".". $seg. $j;
+            $segbeg=$array[2];
+            $segend=$array[3];
+            open SegOut, ">$seg_output_file" or die $!;
+            for(my $Seg=$segbeg;$Seg<=$segend;$Seg++)
+            {
+                my $char=substr($fastaseq,$Seg-1,1);
+                print SegOut "$Seg\t$char\t$seg\n";
+            }
+            close(SegOut);
+        }
+        if($_=~/CYTOPLASMIC./)
+        {
+            if($array[4]=~/CYTOPLASMIC./)
+            {
+                $seg = "in";
+                $k = $k +1;
+                $seg_output_file=$set{"base_dir"}. "/TestData/".  $protein. ".". $seg. $k;
+                $segbeg=$array[2];
+                $segend=$array[3];
+                open SegOut, ">$seg_output_file" or die $!;
+                for(my $Seg=$segbeg;$Seg<=$segend;$Seg++)
+                {
+                	my $char=substr($fastaseq,$Seg-1,1);
+                	print SegOut "$Seg\t$char\t$seg\n";
+                }
+                close(SegOut);
+            }
+        }
 	}
 	close(FILE);
-	#combine segment subunits 
-	while( my( $key, $value ) = each %seg )
+
+	#combine segment subunits
+    my @segs = qw('in' 'mem' 'out');
+	foreach (@segs)
 	{
-		my $Seg_file=$set{"base_dir"}. "/TestData/". $protein. ".". $seg{$key};
-		my $cat_file=$Seg_file. "[1-30]";  #cat all the sub segments ,here assuming each protein has less than 30 tm helix
+		my $Seg_file=$set{"base_dir"}. "/TestData/". $protein. ".". $_;
+		my $cat_file=$Seg_file. "[0-30]";  #cat all the sub segments ,here assuming each protein has less than 30 tm helix
 		system("cat $cat_file >$Seg_file");
 	}
-	print STDERR ".... Segments parser finished ... ";
+	print STDERR ".... Segments parser finished ... \n";
 }
-
 
 
 #-------------------------------------------------------------------------------
@@ -904,15 +940,15 @@ sub Create_TestData
 				# my @array1=split(" ",$_);
 				# push (@array1, splice(@array1, 31, 1));
 				# my $row1=join(" ",@array1);
-				if($file=~/mem/)
+				if($file=~/.mem/)
 				{
 					print OUTPUT "$_\tM\n";
 				}
-				if($file=~/in/)
+				if($file=~/.in/)
 				{
 					print OUTPUT "$_\tI\n";
 				}
-				if($file=~/out/)
+				if($file=~/.out/)
 				{
 					print OUTPUT "$_\tO\n";
 				}

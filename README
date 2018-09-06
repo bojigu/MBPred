@@ -1,15 +1,15 @@
 --------------------------------------------------------------------------------
-TMBPred - a tool for predicting interacting residues of alpha-helix transmembrane proteins. 
+MBPred - a tool for predicting interacting residues of alpha-helix transmembrane proteins.
 
 Version 1.0 (2th Mar 2017)
 --------------------------------------------------------------------------------
 
-TMBPred is a Perl pipeline to predict the interface residues of alpha-helix transmembrane 
+MBPred is a Perl pipeline to predict the interface residues of alpha-helix transmembrane
 proteins  according to their distinctive evolutionary, co-evolutionary, relative 
 position, physical property features, using machine learning methods. It can classify 
 interact and non-interact reisidues not only in transmembrane region, but also for residues in cytoplasmic
 and extracellular regions. 
-The TMBPred current version 1.0 used only the integrated classifier. For the future updated version, three single
+The MBPred current version 1.0 used only the integrated classifier. For the future updated version, three single
 classifiers specially for three segment residues prediction will be developed. 
 
 
@@ -37,7 +37,7 @@ https://github.com/soedinglab/hh-suite
 you can download the uniprot nonredundant database through:
 http://wwwuser.gwdg.de/%7Ecompbiol/data/hhsuite/databases/hhsuite_dbs/uniprot20_2015_06.tgz
 
-5 Polyphobius -- prediction of transmembrane topology and signal peptides from the 
+5 phobius -- prediction of transmembrane topology and signal peptides from the
 amino acid sequence of a protein.
 Here you can get polyphobius:
 http://phobius.sbc.su.se/data.html

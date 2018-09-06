@@ -5,6 +5,7 @@ library(ROCR)
 require(verification)
 args <- commandArgs(TRUE)
 traindata_file=args[1]
+load(traindata_file)
 test_data_file=args[2]
 testd=read.table(test_data_file,header=TRUE)
 Res=testd[,2]
